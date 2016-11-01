@@ -81,7 +81,7 @@ public class RegisterActivity extends BaseActivity {
                 new Thread(new Runnable() {
                     public void run() {
                         try {
-                            // call method in SDK
+                            // 调用SDK的方法注册一个环信帐号，，不是服务器的帐号
                             EMClient.getInstance().createAccount(username, pwd);
                             runOnUiThread(new Runnable() {
                                 public void run() {
