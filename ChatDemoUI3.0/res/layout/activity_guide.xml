@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/activity_guide"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:background="@color/colorPrimary"
+    tools:context="cn.ucai.superwechat.ui.GuideActivity">
+<ImageView
+    android:id="@+id/iv_splash_logo"
+    android:layout_width="80dp"
+    android:layout_height="80dp"
+    android:layout_marginTop="140dp"
+    android:layout_centerHorizontal="true"
+    android:src="@drawable/icon_logo"/>
+    <Button
+        android:id="@+id/btn_login"
+        android:layout_width="140dp"
+        android:layout_height="40dp"
+        android:layout_centerHorizontal="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="175dp"
+        android:text="@string/login"
+        android:textColor="#fff"
+        android:background="#459f3f"/>
+    <Button
+        android:id="@+id/btn_register"
+        android:layout_width="140dp"
+        android:layout_height="40dp"
+        android:layout_centerHorizontal="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="115dp"
+        android:text="@string/register"
+        android:textColor="#000"
+        android:background="#c7c7c7"/>
+</RelativeLayout>
