@@ -16,7 +16,6 @@ package cn.ucai.superwechat.ui;
 import android.app.ProgressDialog;
 import android.os.Bundle;
 import android.text.TextUtils;
-import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
 
@@ -24,98 +23,168 @@ import com.hyphenate.EMError;
 import com.hyphenate.chat.EMClient;
 import com.hyphenate.exceptions.HyphenateException;
 
+import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
-import cn.ucai.superwechat.SuperWeChatHelper;
 import cn.ucai.superwechat.R;
+import cn.ucai.superwechat.SuperWeChatHelper;
+import cn.ucai.superwechat.bean.Result;
+import cn.ucai.superwechat.data.NetDao;
+import cn.ucai.superwechat.data.OkHttpUtils;
+import cn.ucai.superwechat.utils.MFGT;
 
 /**
  * register screen
- *
  */
 public class RegisterActivity extends BaseActivity {
-    private EditText userNameEditText;
-    private EditText passwordEditText;
-    private EditText confirmPwdEditText;
 
+    @Bind(R.id.username)
+    EditText username;
+    @Bind(R.id.usernamenick)
+    EditText usernamenick;
+    @Bind(R.id.password)
+    EditText password;
+    @Bind(R.id.confrompassword)
+    EditText confrompassword;
+
+    ProgressDialog pd = null;
+    String Username = null;
+    String nickname = null;
+    String pwd = null;
+    RegisterActivity mContext;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.em_activity_register);
         ButterKnife.bind(this);
-        userNameEditText = (EditText) findViewById(R.id.username);
-        passwordEditText = (EditText) findViewById(R.id.password);
-        confirmPwdEditText = (EditText) findViewById(R.id.confrompassword);
+        mContext = this;
     }
-    public void back(View view) {
-        finish();
-    }
-//注册按钮的点击事件
+
+    //注册按钮的点击事件
     @OnClick(R.id.login_btn_register)
     public void onClick() {
-            final String username = userNameEditText.getText().toString().trim();
-            final String pwd = passwordEditText.getText().toString().trim();
-            String confirm_pwd = confirmPwdEditText.getText().toString().trim();
-            if (TextUtils.isEmpty(username)) {
-                Toast.makeText(this, getResources().getString(R.string.User_name_cannot_be_empty), Toast.LENGTH_SHORT).show();
-                userNameEditText.requestFocus();
-                return;
-            } else if (TextUtils.isEmpty(pwd)) {
-                Toast.makeText(this, getResources().getString(R.string.Password_cannot_be_empty), Toast.LENGTH_SHORT).show();
-                passwordEditText.requestFocus();
-                return;
-            } else if (TextUtils.isEmpty(confirm_pwd)) {
-                Toast.makeText(this, getResources().getString(R.string.Confirm_password_cannot_be_empty), Toast.LENGTH_SHORT).show();
-                confirmPwdEditText.requestFocus();
-                return;
-            } else if (!pwd.equals(confirm_pwd)) {
-                Toast.makeText(this, getResources().getString(R.string.Two_input_password), Toast.LENGTH_SHORT).show();
-                return;
+        Username = username.getText().toString().trim();
+        nickname = usernamenick.getText().toString().trim();
+        pwd = password.getText().toString().trim();
+        String confirm_pwd = confrompassword.getText().toString().trim();
+        if (TextUtils.isEmpty(Username)) {
+            Toast.makeText(this, getResources().getString(R.string.User_name_cannot_be_empty), Toast.LENGTH_SHORT).show();
+            username.requestFocus();
+            return;
+        }else if (!Username.matches("[a-zA-Z]\\w{5,15}")){
+            Toast.makeText(this, getResources().getString(R.string.illegal_user_name), Toast.LENGTH_SHORT).show();
+            username.requestFocus();
+            return;
+        } else if (TextUtils.isEmpty(nickname)){
+            Toast.makeText(this, getResources().getString(R.string.toast_nick_not_isnull), Toast.LENGTH_SHORT).show();
+            usernamenick.requestFocus();
+            return;
+        }else if (TextUtils.isEmpty(pwd)) {
+            Toast.makeText(this, getResources().getString(R.string.Password_cannot_be_empty), Toast.LENGTH_SHORT).show();
+            password.requestFocus();
+            return;
+        } else if (TextUtils.isEmpty(confirm_pwd)) {
+            Toast.makeText(this, getResources().getString(R.string.Confirm_password_cannot_be_empty), Toast.LENGTH_SHORT).show();
+            confrompassword.requestFocus();
+            return;
+        } else if (!pwd.equals(confirm_pwd)) {
+            Toast.makeText(this, getResources().getString(R.string.Two_input_password), Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        if (!TextUtils.isEmpty(Username) && !TextUtils.isEmpty(pwd)) {
+            pd = new ProgressDialog(this);
+            pd.setMessage(getResources().getString(R.string.Is_the_registered));
+            pd.show();
+            registerAppServer();
+        }
+    }
+
+    //注册superwechat服务器
+    private void registerAppServer() {
+        NetDao.register(mContext, Username, nickname, pwd, new OkHttpUtils.OnCompleteListener<Result>() {
+            @Override
+            public void onSuccess(Result result) {
+                if (result != null && result.isRetMsg()){
+                    registerEMServer();
+                }else {
+                    unregisterAppServer();
+                }
             }
 
-            if (!TextUtils.isEmpty(username) && !TextUtils.isEmpty(pwd)) {
-                final ProgressDialog pd = new ProgressDialog(this);
-                pd.setMessage(getResources().getString(R.string.Is_the_registered));
-                pd.show();
+            @Override
+            public void onError(String error) {
+                pd.dismiss();
+            }
+        });
+        registerEMServer();
+        unregisterAppServer();
+    }
 
-                new Thread(new Runnable() {
-                    public void run() {
-                        try {
-                            // 调用SDK的方法注册一个环信帐号，，不是服务器的帐号
-                            EMClient.getInstance().createAccount(username, pwd);
-                            runOnUiThread(new Runnable() {
-                                public void run() {
-                                    if (!RegisterActivity.this.isFinishing())
-                                        pd.dismiss();
-                                    // save current user
-                                    SuperWeChatHelper.getInstance().setCurrentUserName(username);
-                                    Toast.makeText(getApplicationContext(), getResources().getString(R.string.Registered_successfully), Toast.LENGTH_SHORT).show();
-                                    finish();
-                                }
-                            });
-                        } catch (final HyphenateException e) {
-                            runOnUiThread(new Runnable() {
-                                public void run() {
-                                    if (!RegisterActivity.this.isFinishing())
-                                        pd.dismiss();
-                                    int errorCode = e.getErrorCode();
-                                    if (errorCode == EMError.NETWORK_ERROR) {
-                                        Toast.makeText(getApplicationContext(), getResources().getString(R.string.network_anomalies), Toast.LENGTH_SHORT).show();
-                                    } else if (errorCode == EMError.USER_ALREADY_EXIST) {
-                                        Toast.makeText(getApplicationContext(), getResources().getString(R.string.User_already_exists), Toast.LENGTH_SHORT).show();
-                                    } else if (errorCode == EMError.USER_AUTHENTICATION_FAILED) {
-                                        Toast.makeText(getApplicationContext(), getResources().getString(R.string.registration_failed_without_permission), Toast.LENGTH_SHORT).show();
-                                    } else if (errorCode == EMError.USER_ILLEGAL_ARGUMENT) {
-                                        Toast.makeText(getApplicationContext(), getResources().getString(R.string.illegal_user_name), Toast.LENGTH_SHORT).show();
-                                    } else {
-                                        Toast.makeText(getApplicationContext(), getResources().getString(R.string.Registration_failed), Toast.LENGTH_SHORT).show();
-                                    }
-                                }
-                            });
+    //注册superwechat的服务器失败后删掉此次注册的帐号
+    private void unregisterAppServer() {
+     NetDao.unregister(mContext, Username, new OkHttpUtils.OnCompleteListener<Result>() {
+         @Override
+         public void onSuccess(Result result) {
+             pd.dismiss();
+         }
+
+         @Override
+         public void onError(String error) {
+            pd.dismiss();
+         }
+     });
+    }
+
+    //注册环信服务器
+    private void registerEMServer() {
+        new Thread(new Runnable() {
+            public void run() {
+                try {
+                    // 调用SDK的方法注册一个环信帐号，，不是服务器的帐号
+                    EMClient.getInstance().createAccount(Username, pwd);
+                    runOnUiThread(new Runnable() {
+                        public void run() {
+                            if (!RegisterActivity.this.isFinishing())
+                                pd.dismiss();
+                            // save current user
+                            SuperWeChatHelper.getInstance().setCurrentUserName(Username);
+                            Toast.makeText(getApplicationContext(), getResources().getString(R.string.Registered_successfully), Toast.LENGTH_SHORT).show();
+                            MFGT.finish(mContext);
                         }
-                    }
-                }).start();
-
+                    });
+                } catch (final HyphenateException e) {
+                    unregisterAppServer();//调用注册失败后删除账户的方法
+                    runOnUiThread(new Runnable() {
+                        public void run() {
+                            if (!RegisterActivity.this.isFinishing())
+                                pd.dismiss();
+                            int errorCode = e.getErrorCode();
+                            if (errorCode == EMError.NETWORK_ERROR) {
+                                Toast.makeText(getApplicationContext(), getResources().getString(R.string.network_anomalies), Toast.LENGTH_SHORT).show();
+                            } else if (errorCode == EMError.USER_ALREADY_EXIST) {
+                                Toast.makeText(getApplicationContext(), getResources().getString(R.string.User_already_exists), Toast.LENGTH_SHORT).show();
+                            } else if (errorCode == EMError.USER_AUTHENTICATION_FAILED) {
+                                Toast.makeText(getApplicationContext(), getResources().getString(R.string.registration_failed_without_permission), Toast.LENGTH_SHORT).show();
+                            } else if (errorCode == EMError.USER_ILLEGAL_ARGUMENT) {
+                                Toast.makeText(getApplicationContext(), getResources().getString(R.string.illegal_user_name), Toast.LENGTH_SHORT).show();
+                            } else {
+                                Toast.makeText(getApplicationContext(), getResources().getString(R.string.Registration_failed), Toast.LENGTH_SHORT).show();
+                            }
+                        }
+                    });
+                }
             }
+        }).start();
+    }
+
+    @Override
+    public void onBackPressed() {
+        MFGT.finish(this);
+    }
+
+    @OnClick(R.id.im_back)
+    public void backClick() {
+        MFGT.finish(this);
     }
 }
