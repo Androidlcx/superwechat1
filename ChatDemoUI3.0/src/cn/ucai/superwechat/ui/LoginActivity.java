@@ -64,8 +64,8 @@ public class LoginActivity extends BaseActivity {
     private boolean autoLogin = false;
     String currentUsername ;
     String currentPassword ;
-    ProgressDialog pd;
-    LoginActivity mContect;
+    ProgressDialog pd = null;
+    LoginActivity mContext;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -79,7 +79,7 @@ public class LoginActivity extends BaseActivity {
         }
         setContentView(R.layout.em_activity_login);
         ButterKnife.bind(this);
-        mContect = this;
+        mContext = this;
         setListener();
         initView();
     }
@@ -111,101 +111,105 @@ public class LoginActivity extends BaseActivity {
     }
 
     //登录的方法
-    public void login(){
-                if (!EaseCommonUtils.isNetWorkConnected(this)) {
-                    Toast.makeText(this, R.string.network_isnot_available, Toast.LENGTH_SHORT).show();
-                    return;
-                }
-                 currentUsername = musername.getText().toString().trim();
-                 currentPassword = mpassword.getText().toString().trim();
-
-                if (TextUtils.isEmpty(currentUsername)) {
-                    Toast.makeText(this, R.string.User_name_cannot_be_empty, Toast.LENGTH_SHORT).show();
-                    return;
-                }
-                if (TextUtils.isEmpty(currentPassword)) {
-                    Toast.makeText(this, R.string.Password_cannot_be_empty, Toast.LENGTH_SHORT).show();
-                    return;
-                }
-
-                progressShow = true;
-                pd = new ProgressDialog(LoginActivity.this);
-                pd.setCanceledOnTouchOutside(false);
-                pd.setOnCancelListener(new OnCancelListener() {
-
-                    @Override
-                    public void onCancel(DialogInterface dialog) {
-                        Log.d(TAG, "EMClient.getInstance().onCancel");
-                        progressShow = false;
-                    }
-                });
-                pd.setMessage(getString(R.string.Is_landing));
-                pd.show();
-
-                // After logout，the DemoDB may still be accessed due to async callback, so the DemoDB will be re-opened again.
-                // close it before login to make sure DemoDB not overlap
-                SuperWeChatDBManager.getInstance().closeDB();
-
-                // reset current user name before login
-                SuperWeChatHelper.getInstance().setCurrentUserName(currentUsername);
-
-                final long start = System.currentTimeMillis();
-                // call login method
-                Log.d(TAG, "EMClient.getInstance().login");
-                EMClient.getInstance().login(currentUsername, currentPassword, new EMCallBack() {
-
-                    @Override
-                    public void onSuccess() {
-                        Log.d(TAG, "login: onSuccess");
-
-
-                        // ** manually load all local groups and conversation
-                        EMClient.getInstance().groupManager().loadAllGroups();
-                        EMClient.getInstance().chatManager().loadAllConversations();
-
-                        // update current user's display name for APNs
-                        boolean updatenick = EMClient.getInstance().updateCurrentUserNick(
-                                SuperWeChatApplication.currentUserNick.trim());
-                        if (!updatenick) {
-                            Log.e("LoginActivity", "update current user nick fail");
-                        }
-
-                        if (!LoginActivity.this.isFinishing() && pd.isShowing()) {
-                            pd.dismiss();
-                        }
-                        // get user's info (this should be get from App's server or 3rd party service)
-                        SuperWeChatHelper.getInstance().getUserProfileManager().asyncGetCurrentUserInfo();
-
-                        Intent intent = new Intent(LoginActivity.this,
-                                MainActivity.class);
-                        startActivity(intent);
-
-                        finish();
-                    }
-
-                    @Override
-                    public void onProgress(int progress, String status) {
-                        Log.d(TAG, "login: onProgress");
-                    }
-
-                    @Override
-                    public void onError(final int code, final String message) {
-                        Log.d(TAG, "login: onError: " + code);
-                        if (!progressShow) {
-                            return;
-                        }
-                        runOnUiThread(new Runnable() {
-                            public void run() {
-                                pd.dismiss();
-                                Toast.makeText(getApplicationContext(), getString(R.string.Login_failed) + message,
-                                        Toast.LENGTH_SHORT).show();
-                            }
-                        });
-                    }
-                });
+    public void login() {
+        if (!EaseCommonUtils.isNetWorkConnected(this)) {
+            Toast.makeText(this, R.string.network_isnot_available, Toast.LENGTH_SHORT).show();
+            return;
         }
+        currentUsername = musername.getText().toString().trim();
+        currentPassword = mpassword.getText().toString().trim();
+
+        if (TextUtils.isEmpty(currentUsername)) {
+            Toast.makeText(this, R.string.User_name_cannot_be_empty, Toast.LENGTH_SHORT).show();
+            return;
+        }
+        if (TextUtils.isEmpty(currentPassword)) {
+            Toast.makeText(this, R.string.Password_cannot_be_empty, Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        progressShow = true;
+        pd = new ProgressDialog(mContext);
+        pd.setCanceledOnTouchOutside(false);
+        pd.setOnCancelListener(new OnCancelListener() {
+
+            @Override
+            public void onCancel(DialogInterface dialog) {
+                Log.d(TAG, "EMClient.getInstance().onCancel");
+                progressShow = false;
+            }
+        });
+        pd.setMessage(getString(R.string.Is_landing));
+        pd.show();
+
+        loginEMServer();
+    }
+        private void loginEMServer() {
+            // After logout，the DemoDB may still be accessed due to async callback, so the DemoDB will be re-opened again.
+            // close it before login to make sure DemoDB not overlap
+            SuperWeChatDBManager.getInstance().closeDB();
+
+            // reset current user name before login
+            SuperWeChatHelper.getInstance().setCurrentUserName(currentUsername);
+
+            final long start = System.currentTimeMillis();
+            // call login method
+            Log.d(TAG, "EMClient.getInstance().login");
+            EMClient.getInstance().login(currentUsername, currentPassword, new EMCallBack() {
+
+                @Override
+                public void onSuccess() {
+                    Log.d(TAG, "login: onSuccess");
+
+
+                    // ** manually load all local groups and conversation
+                    EMClient.getInstance().groupManager().loadAllGroups();
+                    EMClient.getInstance().chatManager().loadAllConversations();
+
+                    // update current user's display name for APNs
+                    boolean updatenick = EMClient.getInstance().updateCurrentUserNick(
+                            SuperWeChatApplication.currentUserNick.trim());
+                    if (!updatenick) {
+                        Log.e("LoginActivity", "update current user nick fail");
+                    }
+
+                    if (!LoginActivity.this.isFinishing() && pd.isShowing()) {
+                        pd.dismiss();
+                    }
+                    // get user's info (this should be get from App's server or 3rd party service)
+                    SuperWeChatHelper.getInstance().getUserProfileManager().asyncGetCurrentUserInfo();
+
+                    Intent intent = new Intent(LoginActivity.this,
+                            MainActivity.class);
+                    startActivity(intent);
+
+                    finish();
+                }
+
+                @Override
+                public void onProgress(int progress, String status) {
+                    Log.d(TAG, "login: onProgress");
+                }
+
+                @Override
+                public void onError(final int code, final String message) {
+                    Log.d(TAG, "login: onError: " + code);
+                    if (!progressShow) {
+                        return;
+                    }
+                    runOnUiThread(new Runnable() {
+                        public void run() {
+                            pd.dismiss();
+                            Toast.makeText(getApplicationContext(), getString(R.string.Login_failed) + message,
+                                    Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                }
+            });
+        }
+    
     private void loginAppServer() {
-        NetDao.login(mContect, currentUsername, currentPassword, new OkHttpUtils.OnCompleteListener<String>() {
+        NetDao.login(mContext, currentUsername, currentPassword, new OkHttpUtils.OnCompleteListener<String>() {
             @Override
             public void onSuccess(String s) {
                 L.e(TAG,"s = "+ s);
@@ -214,14 +218,14 @@ public class LoginActivity extends BaseActivity {
                     if (result!=null && result.isRetMsg()){
                         User user = (User) result.getRetData();
                         if (user!=null) {
-                            UserDao dao = new UserDao(mContect);
+                            UserDao dao = new UserDao(mContext);
                             dao.saveUser(user);
                             SuperWeChatHelper.getInstance().setCurrentUser(user);
                             loginSuccess();
                         }
                     }else {
                         pd.dismiss();
-                        L.e(TAG,"login fail,"+result);
+                        L.e(TAG,"login fail="+result);
                     }
                 }else {
                     pd.dismiss();
@@ -284,5 +288,11 @@ public class LoginActivity extends BaseActivity {
                 MFGT.gotoRegister(this);
                 break;
         }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        pd.dismiss();
     }
 }
