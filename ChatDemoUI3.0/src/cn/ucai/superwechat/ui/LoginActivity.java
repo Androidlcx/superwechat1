@@ -24,32 +24,48 @@ import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.hyphenate.EMCallBack;
 import com.hyphenate.chat.EMClient;
+import com.hyphenate.easeui.domain.User;
 import com.hyphenate.easeui.utils.EaseCommonUtils;
 
+import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import cn.ucai.superwechat.R;
 import cn.ucai.superwechat.SuperWeChatApplication;
 import cn.ucai.superwechat.SuperWeChatHelper;
-import cn.ucai.superwechat.R;
+import cn.ucai.superwechat.bean.Result;
+import cn.ucai.superwechat.data.NetDao;
+import cn.ucai.superwechat.data.OkHttpUtils;
 import cn.ucai.superwechat.db.SuperWeChatDBManager;
-import cn.ucai.superwechat.utils.MD5;
+import cn.ucai.superwechat.db.UserDao;
+import cn.ucai.superwechat.utils.L;
+import cn.ucai.superwechat.utils.MFGT;
+import cn.ucai.superwechat.utils.ResultUtils;
 
 /**
  * Login screen
- *
  */
 public class LoginActivity extends BaseActivity {
     private static final String TAG = "LoginActivity";
     public static final int REQUEST_CODE_SETNICK = 1;
-    private EditText usernameEditText;
-    private EditText passwordEditText;
+    @Bind(R.id.im_back)
+    ImageView imBack;
+    @Bind(R.id.username)
+    EditText musername;
+    @Bind(R.id.password)
+    EditText mpassword;
 
     private boolean progressShow;
     private boolean autoLogin = false;
+    String currentUsername ;
+    String currentPassword ;
+    ProgressDialog pd;
+    LoginActivity mContect;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,20 +75,27 @@ public class LoginActivity extends BaseActivity {
         if (SuperWeChatHelper.getInstance().isLoggedIn()) {
             autoLogin = true;
             startActivity(new Intent(LoginActivity.this, MainActivity.class));
-
             return;
         }
         setContentView(R.layout.em_activity_login);
         ButterKnife.bind(this);
+        mContect = this;
+        setListener();
+        initView();
+    }
 
-        usernameEditText = (EditText) findViewById(R.id.username);
-        passwordEditText = (EditText) findViewById(R.id.password);
+    private void initView() {
+        if (SuperWeChatHelper.getInstance().getCurrentUsernName() != null) {
+            musername.setText(SuperWeChatHelper.getInstance().getCurrentUsernName());
+        }
+    }
 
-        // if user changed, clear the password
-        usernameEditText.addTextChangedListener(new TextWatcher() {
+    private void setListener() {
+        // 如果用户改变，则清空密码
+        musername.addTextChangedListener(new TextWatcher() {
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                passwordEditText.setText(null);
+                mpassword.setText(null);
             }
 
             @Override
@@ -85,28 +108,16 @@ public class LoginActivity extends BaseActivity {
 
             }
         });
-        if (SuperWeChatHelper.getInstance().getCurrentUsernName() != null) {
-            usernameEditText.setText(SuperWeChatHelper.getInstance().getCurrentUsernName());
-        }
     }
-    @Override
-    protected void onResume() {
-        super.onResume();
-        if (autoLogin) {
-            return;
-        }
-    }
-//登录注册按钮的点击事件
-    @OnClick({R.id.login_btn_Login, R.id.login_btn_Register})
-    public void onClick(View view) {
-        switch (view.getId()) {
-            case R.id.login_btn_Login:
+
+    //登录的方法
+    public void login(){
                 if (!EaseCommonUtils.isNetWorkConnected(this)) {
                     Toast.makeText(this, R.string.network_isnot_available, Toast.LENGTH_SHORT).show();
                     return;
                 }
-                String currentUsername = usernameEditText.getText().toString().trim();
-                String currentPassword = passwordEditText.getText().toString().trim();
+                 currentUsername = musername.getText().toString().trim();
+                 currentPassword = mpassword.getText().toString().trim();
 
                 if (TextUtils.isEmpty(currentUsername)) {
                     Toast.makeText(this, R.string.User_name_cannot_be_empty, Toast.LENGTH_SHORT).show();
@@ -118,7 +129,7 @@ public class LoginActivity extends BaseActivity {
                 }
 
                 progressShow = true;
-                final ProgressDialog pd = new ProgressDialog(LoginActivity.this);
+                pd = new ProgressDialog(LoginActivity.this);
                 pd.setCanceledOnTouchOutside(false);
                 pd.setOnCancelListener(new OnCancelListener() {
 
@@ -192,9 +203,85 @@ public class LoginActivity extends BaseActivity {
                         });
                     }
                 });
+        }
+    private void loginAppServer() {
+        NetDao.login(mContect, currentUsername, currentPassword, new OkHttpUtils.OnCompleteListener<String>() {
+            @Override
+            public void onSuccess(String s) {
+                L.e(TAG,"s = "+ s);
+                if (s!=null && s!=""){
+                    Result result = ResultUtils.getResultFromJson(s, User.class);
+                    if (result!=null && result.isRetMsg()){
+                        User user = (User) result.getRetData();
+                        if (user!=null) {
+                            UserDao dao = new UserDao(mContect);
+                            dao.saveUser(user);
+                            SuperWeChatHelper.getInstance().setCurrentUser(user);
+                            loginSuccess();
+                        }
+                    }else {
+                        pd.dismiss();
+                        L.e(TAG,"login fail,"+result);
+                    }
+                }else {
+                    pd.dismiss();
+                }
+            }
+
+            @Override
+            public void onError(String error) {
+                pd.dismiss();
+                L.e(TAG,"onError = "+ error);
+            }
+        });
+    }
+
+    private void loginSuccess() {
+
+        // ** manually load all local groups and conversation
+        EMClient.getInstance().groupManager().loadAllGroups();
+        EMClient.getInstance().chatManager().loadAllConversations();
+
+        // update current user's display name for APNs
+        boolean updatenick = EMClient.getInstance().updateCurrentUserNick(
+                SuperWeChatApplication.currentUserNick.trim());
+        if (!updatenick) {
+            Log.e("LoginActivity", "update current user nick fail");
+        }
+
+        if (!LoginActivity.this.isFinishing() && pd.isShowing()) {
+            pd.dismiss();
+        }
+        // get user's info (this should be get from App's server or 3rd party service)
+        SuperWeChatHelper.getInstance().getUserProfileManager().asyncGetCurrentUserInfo();
+
+        Intent intent = new Intent(LoginActivity.this,
+                MainActivity.class);
+        startActivity(intent);
+
+        finish();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (autoLogin) {
+            return;
+        }
+    }
+
+    //登录注册按钮的点击事件
+    @OnClick({R.id.im_back, R.id.login_btn_Login, R.id.login_btn_Register})
+    public void onClick(View view) {
+        switch (view.getId()) {
+            case R.id.im_back:
+                MFGT.finish(this);
+                break;
+            case R.id.login_btn_Login:
+                login();
                 break;
             case R.id.login_btn_Register:
-                startActivityForResult(new Intent(this, RegisterActivity.class), 0);
+                MFGT.gotoRegister(this);
                 break;
         }
     }

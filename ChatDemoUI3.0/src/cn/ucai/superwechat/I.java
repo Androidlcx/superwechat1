@@ -127,7 +127,7 @@ public interface I {
 	int MSG_PUBLIC_GROUP_FAIL						=		415;							//查找公开群失败
 	int MSG_LOCATION_GET_FAIL						=		501;							//获取附近的人失败
 	int MSG_UNKNOW									=		999;							//未知错误
-	int MSG_ILLEGAL_REQUEST							=		-1;								//非法请求
+	int MSG_ILLEGAL_REQUEST							=		1;								//非法请求
 
 //	String SERVER_ROOT = "http://120.26.242.249:8080/SuperWeChatServerV2.0/";
 	String SERVER_ROOT = "http://101.251.196.90:8000/SuperWeChatServerV2.0/swagger/index.html#!/superwechat/get_getServerStatus" ;
