@@ -36,6 +36,7 @@ import cn.ucai.superwechat.SuperWeChatApplication;
 import cn.ucai.superwechat.SuperWeChatHelper;
 import cn.ucai.superwechat.R;
 import cn.ucai.superwechat.db.SuperWeChatDBManager;
+import cn.ucai.superwechat.utils.MD5;
 
 /**
  * Login screen

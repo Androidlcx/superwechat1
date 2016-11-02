@@ -148,7 +148,7 @@ public class RegisterActivity extends BaseActivity {
                         public void run() {
                             if (!RegisterActivity.this.isFinishing())
                                 pd.dismiss();
-                            // save current user
+                            // 保存当前的用户
                             SuperWeChatHelper.getInstance().setCurrentUserName(Username);
                             Toast.makeText(getApplicationContext(), getResources().getString(R.string.Registered_successfully), Toast.LENGTH_SHORT).show();
                             MFGT.finish(mContext);
