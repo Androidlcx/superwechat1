@@ -31,6 +31,7 @@ import cn.ucai.superwechat.SuperWeChatHelper;
 import cn.ucai.superwechat.bean.Result;
 import cn.ucai.superwechat.data.NetDao;
 import cn.ucai.superwechat.data.OkHttpUtils;
+import cn.ucai.superwechat.utils.MD5;
 import cn.ucai.superwechat.utils.MFGT;
 
 /**
@@ -142,7 +143,7 @@ public class RegisterActivity extends BaseActivity {
             public void run() {
                 try {
                     // 调用SDK的方法注册一个环信帐号，，不是服务器的帐号
-                    EMClient.getInstance().createAccount(Username, pwd);
+                    EMClient.getInstance().createAccount(Username,  MD5.getMessageDigest(pwd));
                     runOnUiThread(new Runnable() {
                         public void run() {
                             if (!RegisterActivity.this.isFinishing())
@@ -155,6 +156,7 @@ public class RegisterActivity extends BaseActivity {
                     });
                 } catch (final HyphenateException e) {
                     unregisterAppServer();//调用注册失败后删除账户的方法
+
                     runOnUiThread(new Runnable() {
                         public void run() {
                             if (!RegisterActivity.this.isFinishing())
