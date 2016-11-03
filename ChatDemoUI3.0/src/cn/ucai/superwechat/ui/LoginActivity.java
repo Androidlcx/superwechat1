@@ -272,6 +272,9 @@ public class LoginActivity extends BaseActivity {
         if (autoLogin) {
             return;
         }
+        if (SuperWeChatHelper.getInstance().getCurrentUsernName() != null) {
+            musername.setText(SuperWeChatHelper.getInstance().getCurrentUsernName());
+        }
     }
 
     //登录注册按钮的点击事件
@@ -297,4 +300,5 @@ public class LoginActivity extends BaseActivity {
             pd.dismiss();
         }
     }
+
 }
