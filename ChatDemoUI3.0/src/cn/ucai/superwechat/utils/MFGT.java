@@ -8,6 +8,7 @@ import cn.ucai.superwechat.ui.LoginActivity;
 import cn.ucai.superwechat.ui.MainActivity;
 import cn.ucai.superwechat.ui.RegisterActivity;
 import cn.ucai.superwechat.ui.SettingsActivity;
+import cn.ucai.superwechat.ui.UserProfileActivity;
 
 //闪屏的实现封装
 public class MFGT {
@@ -39,5 +40,9 @@ public class MFGT {
     //跳转到设置的方法
     public static void gotoSettings(Activity context){
         startActivity(context, SettingsActivity.class);
+    }
+    //跳转到个人资料的方法
+    public static void gotoUserProfile(Activity context){
+        startActivity(context, UserProfileActivity.class);
     }
 }
