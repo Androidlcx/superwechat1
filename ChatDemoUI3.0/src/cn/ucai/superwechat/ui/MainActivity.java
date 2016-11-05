@@ -195,6 +195,7 @@ public class MainActivity extends BaseActivity implements DMTabHost.OnCheckedCha
 //		// select first tab
 //		mTabs[0].setSelected(true);
 		mTxtLeft.setVisibility(View.VISIBLE);
+
 		adpter = new MainTabAdpter(getSupportFragmentManager());
 		adpter.clear();
 		mLayoutViewpage.setAdapter(adpter);
@@ -202,7 +203,7 @@ public class MainActivity extends BaseActivity implements DMTabHost.OnCheckedCha
 		adpter.addFragment(new ConversationListFragment(),getString(R.string.app_name));
 		adpter.addFragment(new ContactListFragment(),getString(R.string.contacts));
 		adpter.addFragment(new DiscoverFragment(),getString(R.string.diagnose));
-		adpter.addFragment(new SettingsFragment(),getString(R.string.me));
+		adpter.addFragment(new ProfileFragment(),getString(R.string.me));
 		adpter.notifyDataSetChanged();
 		mLayoutTabhost.setChecked(0);
 		mLayoutTabhost.setOnCheckedChangeListener(this);
