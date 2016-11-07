@@ -29,27 +29,25 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.easemob.redpacketui.utils.RedPacketUtil;
 import com.hyphenate.EMCallBack;
 import com.hyphenate.chat.EMClient;
 import com.hyphenate.chat.EMOptions;
-import cn.ucai.superwechat.Constant;
-import cn.ucai.superwechat.SuperWeChatHelper;
-import cn.ucai.superwechat.SuperWeChatModel;
-import cn.ucai.superwechat.R;
-import cn.ucai.superwechat.utils.ExitAppUtils;
-import cn.ucai.superwechat.utils.MFGT;
-
 import com.hyphenate.easeui.widget.EaseSwitchButton;
 import com.hyphenate.util.EMLog;
 
+import cn.ucai.superwechat.Constant;
+import cn.ucai.superwechat.R;
+import cn.ucai.superwechat.SuperWeChatHelper;
+import cn.ucai.superwechat.SuperWeChatModel;
+import cn.ucai.superwechat.utils.ExitAppUtils;
+
 /**
  * settings screen
- * 
- * 
+ *
  */
 @SuppressWarnings({"FieldCanBeLocal"})
 public class SettingsActivity extends BaseActivity implements OnClickListener {
+	private static final String TAG = SettingsActivity.class.getSimpleName();
 
 	/**
 	 * new message notification
@@ -111,19 +109,18 @@ public class SettingsActivity extends BaseActivity implements OnClickListener {
 
     private SuperWeChatModel settingsModel;
     private EMOptions chatOptions;
-	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.em_fragment_conversation_settings);
-		
+
 		if(savedInstanceState != null && savedInstanceState.getBoolean("isConflict", false))
             return;
-//		ImageView back = (ImageView) findViewById(R.id.im_back);
-//		back.setVisibility(View.VISIBLE);
-//		back.setOnClickListener(this);
-//		TextView title = (TextView) findViewById(R.id.txt_title);
-//		title.setVisibility(View.VISIBLE);
-//		title.setText(getString(R.string.set));
+		ImageView back = (ImageView) findViewById(R.id.img_back);
+		back.setVisibility(View.VISIBLE);
+		back.setOnClickListener(this);
+		TextView title = (TextView) findViewById(R.id.txt_title);
+		title.setVisibility(View.VISIBLE);
+		title.setText(getString(R.string.set));
 		rl_switch_notification = (RelativeLayout) findViewById(R.id.rl_switch_notification);
 		rl_switch_sound = (RelativeLayout) findViewById(R.id.rl_switch_sound);
 		rl_switch_vibrate = (RelativeLayout) findViewById(R.id.rl_switch_vibrate);
@@ -132,7 +129,7 @@ public class SettingsActivity extends BaseActivity implements OnClickListener {
 		rl_switch_delete_msg_when_exit_group = (RelativeLayout) findViewById(R.id.rl_switch_delete_msg_when_exit_group);
 		rl_switch_auto_accept_group_invitation = (RelativeLayout) findViewById(R.id.rl_switch_auto_accept_group_invitation);
 		rl_switch_adaptive_video_encode = (RelativeLayout) findViewById(R.id.rl_switch_adaptive_video_encode);
-		rl_custom_server = (RelativeLayout)  findViewById(R.id.rl_custom_server);
+		rl_custom_server = (RelativeLayout) findViewById(R.id.rl_custom_server);
 
 		notifiSwitch = (EaseSwitchButton) findViewById(R.id.switch_notification);
 		soundSwitch = (EaseSwitchButton) findViewById(R.id.switch_sound);
@@ -150,7 +147,7 @@ public class SettingsActivity extends BaseActivity implements OnClickListener {
 
 		textview1 = (TextView) findViewById(R.id.textview1);
 		textview2 = (TextView) findViewById(R.id.textview2);
-		
+
 		blacklistContainer = (LinearLayout) findViewById(R.id.ll_black_list);
 //		userProfileContainer = (LinearLayout) findViewById(R.id.ll_user_profile);
 		llDiagnose=(LinearLayout) findViewById(R.id.ll_diagnose);
@@ -160,7 +157,7 @@ public class SettingsActivity extends BaseActivity implements OnClickListener {
 		chatOptions = EMClient.getInstance().getOptions();
 		
 		blacklistContainer.setOnClickListener(this);
-//		userProfileContainer.setOnClickListener(this);
+	//	userProfileContainer.setOnClickListener(this);
 		rl_switch_notification.setOnClickListener(this);
 		rl_switch_sound.setOnClickListener(this);
 		rl_switch_vibrate.setOnClickListener(this);
@@ -360,9 +357,6 @@ public class SettingsActivity extends BaseActivity implements OnClickListener {
 			case R.id.rl_custom_server:
 				startActivity(new Intent(this, SetServersActivity.class));
 				break;
-			case R.id.im_back:
-				MFGT.finish(this);
-				break;
 			default:
 				break;
 		}
@@ -382,10 +376,11 @@ public class SettingsActivity extends BaseActivity implements OnClickListener {
 				runOnUiThread(new Runnable() {
 					public void run() {
 						pd.dismiss();
-						// show login screen
-						ExitAppUtils.getInstance().exit();
+	// 					show login screen
+	//					ExitAppUtils.getInstance().exit();
 						finish();
-						startActivity(new Intent(SettingsActivity.this, LoginActivity.class));
+						startActivity(new Intent(SettingsActivity.this, LoginActivity.class)
+								.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK));
 						
 					}
 				});

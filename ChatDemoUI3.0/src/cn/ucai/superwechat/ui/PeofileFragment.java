@@ -1,7 +1,7 @@
 package cn.ucai.superwechat.ui;
 
+
 import android.os.Bundle;
-import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -10,7 +10,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.easemob.redpacketui.utils.RedPacketUtil;
-import com.hyphenate.easeui.domain.EaseUser;
 import com.hyphenate.easeui.utils.EaseUserUtils;
 
 import butterknife.Bind;
@@ -21,20 +20,20 @@ import cn.ucai.superwechat.R;
 import cn.ucai.superwechat.utils.MFGT;
 
 /**
- * Created by Administrator on 2016/11/5.
+ * Created by Administrator on 2016/11/4.
  */
-public class ProfileFragment extends Fragment {
-    @Bind(R.id.iv_profile_avatar)
-    ImageView ivProfileAvatar;
-    @Bind(R.id.tv_profile_nickname)
-    TextView tvProfileNickname;
-    @Bind(R.id.tv_profile_username)
-    TextView tvProfileUsername;
 
-    @Nullable
+public class PeofileFragment extends Fragment {
+    @Bind(R.id.iv_profile_avatar)
+    ImageView mIvProfileAvatar;
+    @Bind(R.id.tv_profile_nickname)
+    TextView mTvProfileNickname;
+    @Bind(R.id.tv_profile_username)
+    TextView mTvProfileUsername;
+
     @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_profile, container, false);
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.fragment_profole, container, false);
         ButterKnife.bind(this, view);
         return view;
     }
@@ -44,19 +43,13 @@ public class ProfileFragment extends Fragment {
         super.onActivityCreated(savedInstanceState);
         if (savedInstanceState != null && savedInstanceState.getBoolean("isConflict", false))
             return;
-         setUserInfo();//设置头像昵称的调用方法
-    }
-//头像，昵称，用户名的设置方法
-    private void setUserInfo() {
-        EaseUserUtils.setCurentAppUserAvatar(getActivity(),ivProfileAvatar);
-        EaseUserUtils.setCurentAppUserNick(tvProfileNickname);
-        EaseUserUtils.setCurrentAppUserNameWithNo(tvProfileUsername);
+        setUserInfo();
     }
 
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-        ButterKnife.unbind(this);
+    private void setUserInfo() {
+        EaseUserUtils.setCurentAppUserAvatar(getActivity(),mIvProfileAvatar);
+        EaseUserUtils.setCurentAppUserNick(mTvProfileNickname);
+        EaseUserUtils.setCurrentAppUserNameWithNo(mTvProfileUsername);
     }
 
     @OnClick({R.id.layout_profile_view, R.id.tv_profile_money, R.id.tv_profile_settings})
@@ -69,11 +62,13 @@ public class ProfileFragment extends Fragment {
             case R.id.tv_profile_money:
                 RedPacketUtil.startChangeActivity(getActivity());
                 break;
+            //end of red packet code
             case R.id.tv_profile_settings:
                 MFGT.gotoSettings(getActivity());
                 break;
         }
     }
+
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);

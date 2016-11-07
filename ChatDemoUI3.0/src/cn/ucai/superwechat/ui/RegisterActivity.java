@@ -1,3 +1,16 @@
+/**
+ * Copyright (C) 2016 Hyphenate Inc. All rights reserved.
+ * <p>
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package cn.ucai.superwechat.ui;
 
 import android.app.ProgressDialog;
@@ -6,7 +19,9 @@ import android.text.TextUtils;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
+
 import com.hyphenate.EMError;
 import com.hyphenate.chat.EMClient;
 import com.hyphenate.exceptions.HyphenateException;
@@ -26,52 +41,66 @@ import cn.ucai.superwechat.utils.MFGT;
 
 /**
  * register screen
+ *
  */
 public class RegisterActivity extends BaseActivity {
-    @Bind(R.id.im_back)
-    ImageView imBack;
-    @Bind(R.id.username)
-    EditText musername;
-    @Bind(R.id.usernamenick)
-    EditText usernamenick;
-    @Bind(R.id.password)
-    EditText password;
-    @Bind(R.id.confrompassword)
-    EditText confrompassword;
-
+    @Bind(R.id.img_back)
+    ImageView mImgBack;
+    @Bind(R.id.txt_title)
+    TextView mTxtTitle;
+    @Bind(R.id.et_username)
+    EditText mEtUsername;
+    @Bind(R.id.et_nickname)
+    EditText mEtNickname;
+    @Bind(R.id.et_password)
+    EditText mEtPassword;
+    @Bind(R.id.et_confirm_password)
+    EditText mEtConfirmPassword;
     ProgressDialog pd = null;
-     String username = null;
-     String nickname = null;
-     String pwd = null;
+    String username ;
+    String nickname ;
+    String pwd ;
     RegisterActivity mContext;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.em_activity_register);
         ButterKnife.bind(this);
         mContext = this;
+        initView();
     }
 
-    public void register() {
-         username = musername.getText().toString().trim();
-         nickname = usernamenick.getText().toString().trim();
-         pwd = password.getText().toString().trim();
-        String confirm_pwd = confrompassword.getText().toString().trim();
+    private void initView() {
+        mImgBack.setVisibility(View.VISIBLE);
+        mTxtTitle.setVisibility(View.VISIBLE);
+        mTxtTitle.setText(R.string.register);
+    }
+
+    public void register() {//注册环信服务器的方法
+        username = mEtUsername.getText().toString().trim();
+        nickname = mEtNickname.getText().toString().trim();
+        pwd = mEtPassword.getText().toString().trim();
+        String confirm_pwd = mEtConfirmPassword.getText().toString().trim();
         if (TextUtils.isEmpty(username)) {
             Toast.makeText(this, getResources().getString(R.string.User_name_cannot_be_empty), Toast.LENGTH_SHORT).show();
-            musername.requestFocus();
+            mEtUsername.requestFocus();
+            return;
+        }else if ( !username.matches("[a-zA-Z]\\w{5,15}")){
+            Toast.makeText(this, getResources().getString(R.string.illegal_user_name), Toast.LENGTH_SHORT).show();
+            mEtUsername.requestFocus();
             return;
         }else if (TextUtils.isEmpty(nickname)){
             Toast.makeText(this, getResources().getString(R.string.toast_nick_not_isnull), Toast.LENGTH_SHORT).show();
-            usernamenick.requestFocus();
+            mEtUsername.requestFocus();
             return;
         }else if (TextUtils.isEmpty(pwd)) {
             Toast.makeText(this, getResources().getString(R.string.Password_cannot_be_empty), Toast.LENGTH_SHORT).show();
-            password.requestFocus();
+            mEtPassword.requestFocus();
             return;
         } else if (TextUtils.isEmpty(confirm_pwd)) {
             Toast.makeText(this, getResources().getString(R.string.Confirm_password_cannot_be_empty), Toast.LENGTH_SHORT).show();
-            confrompassword.requestFocus();
+            mEtConfirmPassword.requestFocus();
             return;
         } else if (!pwd.equals(confirm_pwd)) {
             Toast.makeText(this, getResources().getString(R.string.Two_input_password), Toast.LENGTH_SHORT).show();
@@ -82,22 +111,24 @@ public class RegisterActivity extends BaseActivity {
             pd = new ProgressDialog(this);
             pd.setMessage(getResources().getString(R.string.Is_the_registered));
             pd.show();
-            registerAppServer();//注册自己服务器方法调用
+            registerAppServer();//注册自己服务器的方法
+
         }
     }
-//注册自己服务器的方法
+//成功注册方法
     private void registerAppServer() {
         NetDao.register(mContext, username, nickname, pwd, new OkHttpUtils.OnCompleteListener<Result>() {
             @Override
             public void onSuccess(Result result) {
-                if (result == null){
+                if(result==null){
                     pd.dismiss();
                 }else {
                     if (result.isRetMsg()) {
                         registerEMServer();
                     } else {
-                        if (result.getRetCode() == I.MSG_REGISTER_USERNAME_EXISTS){
+                        if(result.getRetCode()== I.MSG_REGISTER_USERNAME_EXISTS){
                             CommonUtils.showMsgShortToast(result.getRetCode());
+                            pd.dismiss();
                         }else {
                             unregisterAppServer();
                         }
@@ -110,30 +141,27 @@ public class RegisterActivity extends BaseActivity {
                 pd.dismiss();
             }
         });
-        registerEMServer();
-        unregisterAppServer();//注册失败删除用户方法的调用
     }
-//注册失败删除该用户的方法
+//取消注册方法
     private void unregisterAppServer() {
         NetDao.unregister(mContext, username, new OkHttpUtils.OnCompleteListener<Result>() {
             @Override
             public void onSuccess(Result result) {
-
+                pd.dismiss();
             }
 
             @Override
             public void onError(String error) {
-
+                pd.dismiss();
             }
         });
     }
 
-    //注册环信服务器的方法
     private void registerEMServer() {
         new Thread(new Runnable() {
             public void run() {
                 try {
-                    // call method in SDK
+                    // 调用一个SDK的方法去注册一个环信的账号，不是服务器的账号
                     EMClient.getInstance().createAccount(username, MD5.getMessageDigest(pwd));
                     runOnUiThread(new Runnable() {
                         public void run() {
@@ -175,13 +203,13 @@ public class RegisterActivity extends BaseActivity {
         MFGT.finish(this);
     }
 
-    @OnClick({R.id.im_back,R.id.login_btn_register})
+    @OnClick({R.id.img_back, R.id.btn_register})
     public void onClick(View view) {
-        switch (view.getId()){
-            case R.id.im_back:
+        switch (view.getId()) {
+            case R.id.img_back:
                 MFGT.finish(this);
                 break;
-            case R.id.login_btn_register:
+            case R.id.btn_register:
                 register();
                 break;
         }

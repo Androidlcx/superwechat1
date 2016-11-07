@@ -1,7 +1,6 @@
 package cn.ucai.superwechat.ui;
 
 import android.annotation.SuppressLint;
-import android.content.Context;
 import android.media.AudioManager;
 import android.media.Ringtone;
 import android.media.SoundPool;
@@ -18,6 +17,7 @@ import com.hyphenate.chat.EMMessage.Status;
 import com.hyphenate.chat.EMTextMessageBody;
 import cn.ucai.superwechat.Constant;
 import cn.ucai.superwechat.R;
+
 import com.hyphenate.exceptions.EMServiceNotReadyException;
 import com.hyphenate.media.EMLocalSurfaceView;
 import com.hyphenate.media.EMOppositeSurfaceView;
@@ -57,7 +57,7 @@ public class CallActivity extends BaseActivity {
     @Override
     protected void onCreate(Bundle arg0) {
         super.onCreate(arg0);
-        audioManager = (AudioManager) this.getSystemService(Context.AUDIO_SERVICE);
+        audioManager = (AudioManager) this.getSystemService(AUDIO_SERVICE);
     }
     
     @Override
