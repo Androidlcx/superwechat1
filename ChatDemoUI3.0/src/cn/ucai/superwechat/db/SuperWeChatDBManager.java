@@ -396,7 +396,7 @@ public class SuperWeChatDBManager {
         String sql = "select * from " + UserDao.USER_TABLE_NAME + " where "
                 + UserDao.USER_COLUMN_NAME + " = ?";
         User user = null;
-        Cursor cursor = db.rawQuery(sql,new String[]{username});
+           Cursor cursor = db.rawQuery(sql,new String[]{username});
         if (cursor.moveToNext()){
             user = new User();
             user.setMUserName(username);
