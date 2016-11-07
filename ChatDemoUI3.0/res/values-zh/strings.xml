@@ -2,4 +2,5 @@
 <resources>
     <string name="User_name_cannot_be_modify">微信号不可被修改</string>
     <string name="toast_nick_not_modify">昵称未修改</string>
+    <string name="search_user_file">用户不存在</string>
 </resources>
