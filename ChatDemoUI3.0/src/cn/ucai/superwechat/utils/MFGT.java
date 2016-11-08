@@ -10,6 +10,7 @@ import cn.ucai.superwechat.I;
 import cn.ucai.superwechat.R;
 import cn.ucai.superwechat.ui.AddContactActivity;
 import cn.ucai.superwechat.ui.AddFriendActivity;
+import cn.ucai.superwechat.ui.ChatActivity;
 import cn.ucai.superwechat.ui.FriendProfileActivity;
 import cn.ucai.superwechat.ui.LoginActivity;
 import cn.ucai.superwechat.ui.MainActivity;
@@ -71,8 +72,16 @@ public class MFGT {
         intent.putExtra(I.User.USER_NAME,username);
         startActivity(context,intent);
     }
+    //跳转到好友详情界面
     public static void gotoNewFriendsMsg(Activity context){
         startActivity(context, NewFriendsMsgActivity.class);
+    }
+    //和谁聊天的跳转方法
+    public static void gotoChat(Activity context,String username){
+        Intent intent = new Intent();
+        intent.setClass(context, ChatActivity.class);
+        intent.putExtra("userId",username);
+        startActivity(context,intent);
     }
 
 }
