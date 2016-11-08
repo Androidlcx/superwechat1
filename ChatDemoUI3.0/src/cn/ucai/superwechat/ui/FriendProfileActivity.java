@@ -81,6 +81,7 @@ public class FriendProfileActivity extends BaseActivity {
                 MFGT.finish(this);
                 break;
             case R.id.btn_add_contact:
+                MFGT.gotoAddFirendMsg(this,user.getMUserName());
                 break;
             case R.id.btn_send_msg:
                 break;
