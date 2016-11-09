@@ -443,19 +443,18 @@ public class MainActivity extends BaseActivity implements DMTabHost.OnCheckedCha
 
     /**
      * update unread message count
+     * 更新未读消息数
      */
     public void updateUnreadLabel() {
         int count = getUnreadMsgCountTotal();
-//		if (count > 0) {
-//			unreadLabel.setText(String.valueOf(count));
-//			unreadLabel.setVisibility(View.VISIBLE);
-//		} else {
-//			unreadLabel.setVisibility(View.INVISIBLE);
-//		}
+		if (count > 0) {
+			mLayoutTabhost.setUnreadCount(0,count);
+		}
     }
 
     /**
      * update the total unread count
+     * 更新未读的总数
      */
     public void updateUnreadAddressLable() {
         //未读消息的数量
