@@ -8,6 +8,7 @@ import java.util.List;
 /**
  * Created by Administrator on 2016/11/5.
  */
+
 public class ExitAppUtils {
     List<Activity> mActivityList = new LinkedList<>();
     private static ExitAppUtils instance = new ExitAppUtils();
@@ -16,15 +17,18 @@ public class ExitAppUtils {
 
     public static ExitAppUtils getInstance(){
         return instance;
-    }
+           }
+
     public void addActivity(Activity activity){
         mActivityList.add(activity);
     }
+
     public void delActivity(Activity activity){
         mActivityList.remove(activity);
     }
-    public  void exit(){
-        for (Activity activity : mActivityList){
+
+    public void exit(){
+        for (Activity activity: mActivityList){
             activity.finish();
         }
     }

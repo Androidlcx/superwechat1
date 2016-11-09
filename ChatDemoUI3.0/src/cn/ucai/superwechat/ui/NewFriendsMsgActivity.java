@@ -37,9 +37,9 @@ import cn.ucai.superwechat.utils.MFGT;
 public class NewFriendsMsgActivity extends BaseActivity {
 
     @Bind(R.id.img_back)
-    ImageView imgBack;
+    ImageView mImgBack;
     @Bind(R.id.txt_title)
-    TextView txtTitle;
+    TextView mTxtTitle;
     @Bind(R.id.list)
     ListView listView;
 
@@ -48,9 +48,9 @@ public class NewFriendsMsgActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.em_activity_new_friends_msg);
         ButterKnife.bind(this);
-        imgBack.setVisibility(View.VISIBLE);
-        txtTitle.setVisibility(View.VISIBLE);
-        txtTitle.setText(getString(R.string.recommended_friends));
+        mImgBack.setVisibility(View.VISIBLE);
+        mTxtTitle.setVisibility(View.VISIBLE);
+        mTxtTitle.setText(getString(R.string.recommended_friends));
         InviteMessgeDao dao = new InviteMessgeDao(this);
         List<InviteMessage> msgs = dao.getMessagesList();
 
@@ -59,6 +59,11 @@ public class NewFriendsMsgActivity extends BaseActivity {
         dao.saveUnreadMessageCount(0);
 
     }
+
+    public void back(View view) {
+        finish();
+    }
+
     @OnClick(R.id.img_back)
     public void onClick() {
         MFGT.finish(this);

@@ -37,7 +37,6 @@ public class UserDao {
 	public static final String ROBOT_COLUMN_NAME_NICK = "nick";
 	public static final String ROBOT_COLUMN_NAME_AVATAR = "avatar";
 
-
 	public static final String USER_TABLE_NAME = "t_superwechat_user";
 	public static final String USER_COLUMN_NAME = "m_user_name";
 	public static final String USER_COLUMN_NICK = "m_user_nick";
@@ -46,8 +45,9 @@ public class UserDao {
 	public static final String USER_COLUMN_AVATAR_PATH= "m_user_avatar_path";
 	public static final String USER_COLUMN_AVATAR_SUFFIX = "m_user_avatar_suffix";
 	public static final String USER_COLUMN_AVATAR_LASTUPDATE_TIME = "m_user_avatar_lastupdate_time";
-	
-	
+	private Map<String, User> appContactList;
+
+
 	public UserDao(Context context) {
 	}
 
@@ -124,7 +124,6 @@ public class UserDao {
 	}
 
 	public Map<String, User> getAppContactList() {
-
 		return SuperWeChatDBManager.getInstance().getAppContactList();
 	}
 

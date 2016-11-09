@@ -1,6 +1,5 @@
 package cn.ucai.superwechat.ui;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -18,27 +17,25 @@ import cn.ucai.superwechat.R;
 import cn.ucai.superwechat.SuperWeChatHelper;
 import cn.ucai.superwechat.utils.MFGT;
 
-/**
- * Created by Administrator on 2016/11/7.
- */
 public class FriendProfileActivity extends BaseActivity {
+
     @Bind(R.id.img_back)
-    ImageView imgBack;
+    ImageView mImgBack;
     @Bind(R.id.txt_title)
-    TextView txtTitle;
+    TextView mTxtTitle;
     @Bind(R.id.profile_image)
-    ImageView profileImage;
+    ImageView mProfileImage;
     @Bind(R.id.tv_userinfo_nick)
-    TextView tvUserinfoNick;
+    TextView mTvUserinfoNick;
     @Bind(R.id.tv_userinfo_name)
-    TextView tvUserinfoName;
+    TextView mTvUserinfoName;
     User user = null;
     @Bind(R.id.btn_add_contact)
-    Button btnAddContact;
+    Button mBtnAddContact;
     @Bind(R.id.btn_send_msg)
-    Button btnSendMsg;
+    Button mBtnSendMsg;
     @Bind(R.id.btn_send_video)
-    Button btnSendVideo;
+    Button mBtnSendVideo;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,33 +43,34 @@ public class FriendProfileActivity extends BaseActivity {
         setContentView(R.layout.activity_friend_profile);
         ButterKnife.bind(this);
         user = (User) getIntent().getSerializableExtra(I.User.USER_NAME);
-        if (user != null) {
+        if (user == null) {
             MFGT.finish(this);
+            return;
         }
         initView();
     }
 
     private void initView() {
-        imgBack.setVisibility(View.VISIBLE);
-        txtTitle.setVisibility(View.VISIBLE);
-        txtTitle.setText(getString(R.string.userinfo_txt_profile));
+        mImgBack.setVisibility(View.VISIBLE);
+        mTxtTitle.setVisibility(View.VISIBLE);
+        mTxtTitle.setText(getString(R.string.userinfo_txt_profile));
         setUserInfo();
         isFriend();
     }
 
     private void isFriend() {
         if (SuperWeChatHelper.getInstance().getAppContactList().containsKey(user.getMUserName())) {
-            btnSendMsg.setVisibility(View.VISIBLE);
-            btnSendVideo.setVisibility(View.VISIBLE);
+            mBtnSendMsg.setVisibility(View.VISIBLE);
+            mBtnSendVideo.setVisibility(View.VISIBLE);
         } else {
-            btnAddContact.setVisibility(View.VISIBLE);
+            mBtnAddContact.setVisibility(View.VISIBLE);
         }
     }
 
     private void setUserInfo() {
-        EaseUserUtils.setAppUserAvatar(this, user.getMUserName(), profileImage);
-        EaseUserUtils.setAppUserNick(user.getMUserNick(), tvUserinfoNick);
-        EaseUserUtils.setAppUserNameWithNo(user.getMUserName(), tvUserinfoName);
+        EaseUserUtils.setAppUserAvatar(this, user.getMUserName(), mProfileImage);
+        EaseUserUtils.setAppUserNick(user.getMUserNick(), mTvUserinfoNick);
+        EaseUserUtils.setAppUserNameWithNo(user.getMUserName(), mTvUserinfoName);
     }
 
     @OnClick({R.id.img_back, R.id.btn_add_contact, R.id.btn_send_msg, R.id.btn_send_video})

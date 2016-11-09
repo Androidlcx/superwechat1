@@ -12,12 +12,12 @@ public class User implements Serializable {
 	private String mavatarSuffix;
 	private Integer mavatarType;
 	private String mavatarLastUpdateTime;
+
 	/**
 	 * initial letter for nickname
 	 */
 	protected String initialLetter;
-	private String avatar;
-
+	
 	public User() {
 		super();
 	}
@@ -54,7 +54,7 @@ public class User implements Serializable {
 	public void setMUserNick(String muserNick) {
 		this.muserNick = muserNick;
 	}
-
+	
 	public Integer getMAvatarId() {
 		return mavatarId;
 	}
@@ -62,7 +62,6 @@ public class User implements Serializable {
 	public void setMAvatarId(Integer mavatarId) {
 		this.mavatarId = mavatarId;
 	}
-
 	public String getMAvatarPath() {
 		return mavatarPath;
 	}
@@ -86,19 +85,19 @@ public class User implements Serializable {
 	public void setMAvatarLastUpdateTime(String mavatarLastUpdateTime) {
 		this.mavatarLastUpdateTime = mavatarLastUpdateTime;
 	}
-
+	
 	public void setMAvatarSuffix(String mavatarSuffix) {
 		this.mavatarSuffix = mavatarSuffix;
 	}
 
 	public String getMAvatarSuffix() {
-		return mavatarSuffix == null ?".jpg":mavatarSuffix;
+		return mavatarSuffix==null?".jpg":mavatarSuffix;
 	}
 
 //	public String getInitialLetter() {
-////		if(initialLetter == null){
-////			UserUtils.setUserInitialLetter(this);
-////		}
+//		if(initialLetter == null){
+//			UserUtils.setUserInitialLetter(this);
+//		}
 //		return initialLetter;
 //	}
 //
@@ -108,13 +107,20 @@ public class User implements Serializable {
 
 	@Override
 	public String toString() {
-		return "UserAvatar [muserName=" + muserName + ", muserNick=" + muserNick + ", mavatarId=" + mavatarId
-				+ ", mavatarPath=" + mavatarPath + ", mavatarSuffix=" + mavatarSuffix + ", mavatarType=" + mavatarType
-				+ ", mavatarLastUpdateTime=" + mavatarLastUpdateTime + "]";
+		return "User{" +
+				"muserName='" + muserName + '\'' +
+				", muserNick='" + muserNick + '\'' +
+				", mavatarId=" + mavatarId +
+				", mavatarPath='" + mavatarPath + '\'' +
+				", mavatarSuffix='" + mavatarSuffix + '\'' +
+				", mavatarType=" + mavatarType +
+				", mavatarLastUpdateTime='" + mavatarLastUpdateTime + '\'' +
+				", initialLetter='" + initialLetter + '\'' +
+				'}';
 	}
 
 	public String getInitialLetter() {
-		if (initialLetter == null) {
+		if(initialLetter == null){
 			EaseCommonUtils.setAppUserInitialLetter(this);
 		}
 		return initialLetter;

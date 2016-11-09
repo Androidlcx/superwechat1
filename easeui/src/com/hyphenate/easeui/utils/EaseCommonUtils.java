@@ -235,7 +235,7 @@ public class EaseCommonUtils {
         }
         user.setInitialLetter(letter);
     }
-    
+
     /**
      * change the chat type to EMConversationType
      * @param chatType

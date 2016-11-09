@@ -1,6 +1,6 @@
 /**
  * Copyright (C) 2016 Hyphenate Inc. All rights reserved.
- * <p/>
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -100,7 +100,17 @@ public class MainActivity extends BaseActivity implements DMTabHost.OnCheckedCha
     private boolean isCurrentAccountRemoved = false;
 
     MainTabAdpter adpter;
+
     TitlePopup mTitlePopup;
+
+    private AlertDialog.Builder conflictBuilder;
+    private AlertDialog.Builder accountRemovedBuilder;
+    private boolean isConflictDialogShow;
+    private boolean isAccountRemovedDialogShow;
+    private BroadcastReceiver internalDebugReceiver;
+    private ConversationListFragment conversationListFragment;
+    private BroadcastReceiver broadcastReceiver;
+    private LocalBroadcastManager broadcastManager;
 
 
     /**
@@ -130,8 +140,6 @@ public class MainActivity extends BaseActivity implements DMTabHost.OnCheckedCha
 
         inviteMessgeDao = new InviteMessgeDao(this);
         UserDao userDao = new UserDao(this);
-//		conversationListFragment = new ConversationListFragment();
-		contactListFragment = new ContactListFragment();
 //		SettingsFragment settingFragment = new SettingsFragment();
 //		fragments = new Fragment[] { conversationListFragment, contactListFragment, settingFragment};
 //
@@ -224,8 +232,8 @@ public class MainActivity extends BaseActivity implements DMTabHost.OnCheckedCha
         mLayoutViewpage.setAdapter(adpter);
         mLayoutViewpage.setOffscreenPageLimit(4);
         adpter.addFragment(conversationListFragment, getString(R.string.app_name));
-        adpter.addFragment(contactListFragment, getString(R.string.contacts));
-        adpter.addFragment(new DiscoverFragment(), getString(R.string.diagnose));
+        adpter.addFragment( contactListFragment, getString(R.string.contacts));
+        adpter.addFragment(new DiscoverFragment(), getString(R.string.discover));
         adpter.addFragment(new PeofileFragment(), getString(R.string.me));
         adpter.notifyDataSetChanged();
         currentTabIndex = 0;
@@ -233,11 +241,11 @@ public class MainActivity extends BaseActivity implements DMTabHost.OnCheckedCha
         mLayoutTabhost.setOnCheckedChangeListener(this);
         mLayoutViewpage.setOnPageChangeListener(this);
         mTitlePopup = new TitlePopup(this, ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        mTitlePopup.setItemOnClickListener(mOnItemOnClickListener);
         mTitlePopup.addAction(new ActionItem(this, R.string.menu_groupchat, R.drawable.icon_menu_group));
         mTitlePopup.addAction(new ActionItem(this, R.string.menu_addfriend, R.drawable.icon_menu_addfriend));
         mTitlePopup.addAction(new ActionItem(this, R.string.menu_qrcode, R.drawable.icon_menu_sao));
         mTitlePopup.addAction(new ActionItem(this, R.string.menu_money, R.drawable.icon_menu_money));
-        mTitlePopup.setItemOnClickListener(mOnItemOnClickListener);
     }
     TitlePopup.OnItemOnClickListener mOnItemOnClickListener = new TitlePopup.OnItemOnClickListener() {
         @Override
@@ -255,6 +263,7 @@ public class MainActivity extends BaseActivity implements DMTabHost.OnCheckedCha
             }
         }
     };
+
     /**
      * on tab clicked
      *
@@ -331,16 +340,16 @@ public class MainActivity extends BaseActivity implements DMTabHost.OnCheckedCha
             public void onReceive(Context context, Intent intent) {
                 updateUnreadLabel();
                 updateUnreadAddressLable();
-//                if (currentTabIndex == 0) {
+    //            if (currentTabIndex == 0) {
                     // refresh conversation list
                     if (conversationListFragment != null) {
                         conversationListFragment.refresh();
                     }
-//                } else if (currentTabIndex == 1) {
+    //            } elseif (currentTabIndex == 1) {
                     if(contactListFragment != null) {
                         contactListFragment.refresh();
                     }
-//                }
+     //           }
                 String action = intent.getAction();
                 if (action.equals(Constant.ACTION_GROUP_CHANAGED)) {
                     if (EaseCommonUtils.getTopActivity(MainActivity.this).equals(GroupsActivity.class.getName())) {
@@ -382,7 +391,7 @@ public class MainActivity extends BaseActivity implements DMTabHost.OnCheckedCha
         mLayoutViewpage.setCurrentItem(checkedPosition, false);
     }
 
-    @OnClick(R.id.txt_right)
+    @OnClick(R.id.img_right)
     public void showPop() {
         mTitlePopup.show(findViewById(R.id.layout_title));
     }
@@ -443,30 +452,35 @@ public class MainActivity extends BaseActivity implements DMTabHost.OnCheckedCha
 
     /**
      * update unread message count
-     * 更新未读消息数
      */
     public void updateUnreadLabel() {
         int count = getUnreadMsgCountTotal();
-		if (count > 0) {
-			mLayoutTabhost.setUnreadCount(0,count);
-		}
+//		if (count > 0) {
+//			unreadLabel.setText(String.valueOf(count));
+//			unreadLabel.setVisibility(View.VISIBLE);
+//		} else {
+//			unreadLabel.setVisibility(View.INVISIBLE);
+//		}
+        L.e(TAG,"updateUnread,count="+count);
+        mLayoutTabhost.setUnreadCount(0,count);
     }
 
     /**
      * update the total unread count
-     * 更新未读的总数
      */
     public void updateUnreadAddressLable() {
-        //未读消息的数量
         runOnUiThread(new Runnable() {
             public void run() {
                 int count = getUnreadAddressCountTotal();
                 L.e(TAG,"updateUnreadAddressLable,count="+count);
-				if (count > 0) {
-					mLayoutTabhost.setHasNew(1,true);
-				} else {
-					mLayoutTabhost.setHasNew(1,false);
-				}
+                L.e(TAG,"updateUnreadAddressLable,mLayoutTabhost="+mLayoutTabhost);
+                if (mLayoutTabhost!=null) {
+                    if (count > 0) {
+                        mLayoutTabhost.setHasNew(1, true);
+                    } else {
+                        mLayoutTabhost.setHasNew(1, false);
+                    }
+                }
             }
         });
 
@@ -509,11 +523,13 @@ public class MainActivity extends BaseActivity implements DMTabHost.OnCheckedCha
             updateUnreadLabel();
             updateUnreadAddressLable();
         }
+
         boolean extra = getIntent().getBooleanExtra(I.ACTION_BACK_CONVERSATION, false);
-        L.e("MainActivity extra="+extra);
-        if (extra){
+        L.e(TAG,"extra="+extra);
+        if(extra){
             mLayoutTabhost.setChecked(0);
         }
+
         // unregister this event listener when this activity enters the
         // background
         SuperWeChatHelper sdkHelper = SuperWeChatHelper.getInstance();
@@ -546,15 +562,6 @@ public class MainActivity extends BaseActivity implements DMTabHost.OnCheckedCha
         }
         return super.onKeyDown(keyCode, event);
     }
-
-    private AlertDialog.Builder conflictBuilder;
-    private AlertDialog.Builder accountRemovedBuilder;
-    private boolean isConflictDialogShow;
-    private boolean isAccountRemovedDialogShow;
-    private BroadcastReceiver internalDebugReceiver;
-    private ConversationListFragment conversationListFragment;
-    private BroadcastReceiver broadcastReceiver;
-    private LocalBroadcastManager broadcastManager;
 
     /**
      * show the dialog when user logged into another device
@@ -636,10 +643,11 @@ public class MainActivity extends BaseActivity implements DMTabHost.OnCheckedCha
         } else if (intent.getBooleanExtra(Constant.ACCOUNT_REMOVED, false) && !isAccountRemovedDialogShow) {
             showAccountRemovedDialog();
         }
-        boolean isBack = intent.getBooleanExtra(I.ACTION_BACK_CONVERSATION, false);
-        L.e("MainActivity isBack="+isBack);
-        if (isBack){
-            mLayoutTabhost.setChecked(0);
+
+    boolean isBack = intent.getBooleanExtra(I.ACTION_BACK_CONVERSATION, false);
+    L.e(TAG,"isBack="+isBack);
+    if(isBack) {
+        mLayoutTabhost.setChecked(0);
         }
     }
 

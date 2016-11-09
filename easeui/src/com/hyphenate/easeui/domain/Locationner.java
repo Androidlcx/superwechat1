@@ -2,7 +2,7 @@ package com.hyphenate.easeui.domain;
 
 import java.io.Serializable;
 
-public class LocationUser extends User implements Serializable{
+public class Locationner extends User implements Serializable{
 	private static final long serialVersionUID = 1L;
 	private Integer mlocationId;
 	private Double mlocationLatitude;
@@ -10,13 +10,13 @@ public class LocationUser extends User implements Serializable{
 	private Boolean mlocationIsSearched;
 	private String mlocationLastUpdateTime;
 	private Double distance;
-	public LocationUser() {
+	public Locationner() {
 		super();
 	}
 
-	public LocationUser(String muserName, String muserNick, Integer mavatarId, String mavatarPath, String mavatarSuffix,
-						Integer mavatarType, String mavatarLastUpdateTime, Integer mlocationId, Double mlocationLatitude, Double mlocationLongitude,
-						Boolean mlocationIsSearched, String mlocationLastUpdateTime, Double distance) {
+	public Locationner(String muserName, String muserNick, Integer mavatarId, String mavatarPath, String mavatarSuffix,
+					   Integer mavatarType, String mavatarLastUpdateTime, Integer mlocationId, Double mlocationLatitude, Double mlocationLongitude,
+					   Boolean mlocationIsSearched, String mlocationLastUpdateTime, Double distance) {
 		super(muserName, muserNick, mavatarId, mavatarPath,mavatarSuffix, mavatarType, mavatarLastUpdateTime);
 		this.mlocationId = mlocationId;
 		this.mlocationLatitude = mlocationLatitude;

@@ -214,8 +214,7 @@ public class LoginActivity extends BaseActivity {
                         if (result!=null && result.isRetMsg()){
                             User user = (User) result.getRetData();
                             if (user!=null) {
-                                UserDao dao = new UserDao(mContect);
-                                dao.saveUser(user);
+                                SuperWeChatHelper.getInstance().saveAppContact(user);
                                 SuperWeChatHelper.getInstance().setCurrentUser(user);
                                 loginSuccess();
                             }

@@ -283,9 +283,9 @@ public class SuperWeChatModel {
         dao.saveAppContactList(contactList);
         return true;
     }
-    public void delAppContact(String username){
+    public void delAppContact(String usernamae){
         UserDao dao = new UserDao(context);
-        dao.deleteAppContact(username);
+        dao.deleteAppContact(usernamae);
     }
 
     enum Key{

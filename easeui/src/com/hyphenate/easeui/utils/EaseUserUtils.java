@@ -40,11 +40,11 @@ public class EaseUserUtils {
 
         return null;
     }
+
     public static User getCurrentAppUserInfo(){
         String username = EMClient.getInstance().getCurrentUser();
         if(userProvider != null)
             return userProvider.getAppUser(username);
-
         return null;
     }
     
@@ -87,7 +87,7 @@ public class EaseUserUtils {
      */
     public static void setAppUserAvatar(Context context, String username, ImageView imageView){
         User user = getAppUserInfo(username);
-        if (user == null){
+        if (user==null){
             user = new User(username);
         }
         if(user != null && user.getAvatar() != null){
@@ -96,14 +96,13 @@ public class EaseUserUtils {
                 Glide.with(context).load(avatarResId).into(imageView);
             } catch (Exception e) {
                 //use default avatar
-                Glide.with(context).load(user.getAvatar()).diskCacheStrategy(DiskCacheStrategy.ALL).placeholder(R.drawable.default_hd_avatar).into(imageView);
+                Glide.with(context).load(user.getAvatar()).diskCacheStrategy(DiskCacheStrategy.ALL).placeholder(R.drawable.ease_default_avatar).into(imageView);
             }
-        }else if (username != null){
-            User u = new User(username);
         }else{
             Glide.with(context).load(R.drawable.default_hd_avatar).into(imageView);
         }
     }
+
     /**
      * set user avatar
      * @param path
@@ -123,11 +122,11 @@ public class EaseUserUtils {
     }
 
     /**
-     * set appuser's nickname
+     * set app user's nickname
      */
     public static void setAppUserNick(String username,TextView textView){
         if(textView != null){
-           User user = getAppUserInfo(username);
+            User user = getAppUserInfo(username);
             if(user != null && user.getMUserNick() != null){
                 textView.setText(user.getMUserNick());
             }else{
@@ -135,30 +134,32 @@ public class EaseUserUtils {
             }
         }
     }
-    //ProfileFragment页面设置头像的方法
     public static void setCurentAppUserAvatar(FragmentActivity activity, ImageView imageView) {
         String username = EMClient.getInstance().getCurrentUser();
         setAppUserAvatar(activity,username,imageView);
     }
-    //ProfileFragment页面设置昵称的方法
+
+
     public static void setCurentAppUserNick(TextView textView) {
         String username = EMClient.getInstance().getCurrentUser();
         setAppUserNick(username,textView);
     }
-     //ProfileFragment页面设置微信好前缀的方法
+
     public static void setCurrentAppUserNameWithNo(TextView textView) {
         String username = EMClient.getInstance().getCurrentUser();
-        setAppUserName("微信号 ：",username,textView);
+        setAppUserName("微信号 : ",username,textView);
     }
+    public static void setAppUserNameWithNo(String username, TextView textView) {
+        setAppUserName("微信号 : ",username,textView);
+    }
+
     public static void setCurrentAppUserName(TextView textView) {
         String username = EMClient.getInstance().getCurrentUser();
         setAppUserName("",username,textView);
     }
-    public static void setAppUserName(String suffix,String username, TextView textView) {
+
+    public static void setAppUserName(String suffix, String username, TextView textView) {
         textView.setText(suffix + username);
     }
-    //设置用户名发送微信号
-    public static void setAppUserNameWithNo(String username, TextView textView) {
-        setAppUserName("微信号 ：",username,textView);
-    }
 }
+
