@@ -651,13 +651,13 @@ public class SuperWeChatHelper {
         }
 
         @Override
-        public void onContactDeleted(String username) {
+        public void onContactDeleted(final String username) {
             Map<String, EaseUser> localUsers = SuperWeChatHelper.getInstance().getContactList();
             localUsers.remove(username);
             userDao.deleteContact(username);
             inviteMessgeDao.deleteMessage(username);
-
-            broadcastManager.sendBroadcast(new Intent(Constant.ACTION_CONTACT_CHANAGED));
+             SuperWeChatHelper.getInstance().delAppContact(username);
+             broadcastManager.sendBroadcast(new Intent(Constant.ACTION_CONTACT_CHANAGED));
         }
 
         @Override
@@ -1356,5 +1356,12 @@ public class SuperWeChatHelper {
         ArrayList<User> mList = new ArrayList<User>();
         mList.addAll(appcontactList.values());
         demoModel.saveAppContactList(mList);
+    }
+    /**
+     * save single contact
+     */
+    public void delAppContact(String username){
+        getAppContactList().remove(username);
+        demoModel.delAppContact(username);
     }
 }
