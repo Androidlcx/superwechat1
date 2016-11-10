@@ -14,10 +14,11 @@
 package cn.ucai.superwechat.ui;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Message;
 import android.support.v4.widget.SwipeRefreshLayout;
-import android.support.v4.widget.SwipeRefreshLayout.OnRefreshListener;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnTouchListener;
@@ -25,47 +26,68 @@ import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.appindexing.Action;
+import com.google.android.gms.appindexing.AppIndex;
+import com.google.android.gms.common.api.GoogleApiClient;
 import com.hyphenate.chat.EMClient;
 import com.hyphenate.chat.EMGroup;
+
+import butterknife.OnClick;
 import cn.ucai.superwechat.Constant;
 import cn.ucai.superwechat.R;
 import cn.ucai.superwechat.adapter.GroupAdapter;
 import com.hyphenate.exceptions.HyphenateException;
 
+import butterknife.Bind;
+import cn.ucai.superwechat.utils.MFGT;
+
 import java.util.List;
+
 
 public class GroupsActivity extends BaseActivity {
 	public static final String TAG = "GroupsActivity";
-	private ListView groupListView;
+	@Bind(R.id.img_back)
+	ImageView mImgBack;
+	@Bind(R.id.txt_title)
+	TextView mTxtTitle;
+	@Bind(R.id.list)
+	ListView mList;
+	@Bind(R.id.swipe_layout)
+	SwipeRefreshLayout mSwipeLayout;
 	protected List<EMGroup> grouplist;
 	private GroupAdapter groupAdapter;
 	private InputMethodManager inputMethodManager;
 	public static GroupsActivity instance;
 	private View progressBar;
-	private SwipeRefreshLayout swipeRefreshLayout;
-	
-	
-	Handler handler = new Handler(){
-	    public void handleMessage(android.os.Message msg) {
-	        swipeRefreshLayout.setRefreshing(false);
-	        switch (msg.what) {
-            case 0:
-                refresh();
-                break;
-            case 1:
-                Toast.makeText(GroupsActivity.this, R.string.Failed_to_get_group_chat_information, Toast.LENGTH_LONG).show();
-                break;
 
-            default:
-                break;
-            }
-	    }
+
+	Handler handler = new Handler() {
+		public void handleMessage(Message msg) {
+			mSwipeLayout.setRefreshing(false);
+			switch (msg.what) {
+				case 0:
+					refresh();
+					break;
+				case 1:
+					Toast.makeText(GroupsActivity.this, R.string.Failed_to_get_group_chat_information, Toast.LENGTH_LONG).show();
+					break;
+				default:
+					break;
+			}
+		}
 	};
+	/**
+	 * ATTENTION: This was auto-generated to implement the App Indexing API.
+	 * See https://g.co/AppIndexing/AndroidStudio for more information.
+	 */
+	private GoogleApiClient client;
 
-		
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -74,22 +96,18 @@ public class GroupsActivity extends BaseActivity {
 		instance = this;
 		inputMethodManager = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
 		grouplist = EMClient.getInstance().groupManager().getAllGroups();
-		groupListView = (ListView) findViewById(R.id.list);
-		//show group list
-        groupAdapter = new GroupAdapter(this, 1, grouplist);
-        groupListView.setAdapter(groupAdapter);
-		
-		swipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swipe_layout);
-		swipeRefreshLayout.setColorSchemeResources(R.color.holo_blue_bright, R.color.holo_green_light,
-		                R.color.holo_orange_light, R.color.holo_red_light);
-		//pull down to refresh
-		swipeRefreshLayout.setOnRefreshListener(new OnRefreshListener() {
+		initView();
+		setListener();
+	}
 
+	private void setListener() {
+		//pull down to refresh
+		mSwipeLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
 			@Override
 			public void onRefresh() {
 				new Thread(){
 					@Override
-					public void run(){
+					public void run() {
 						try {
 							EMClient.getInstance().groupManager().getJoinedGroupsFromServer();
 							handler.sendEmptyMessage(0);
@@ -101,17 +119,19 @@ public class GroupsActivity extends BaseActivity {
 				}.start();
 			}
 		});
-		
-		groupListView.setOnItemClickListener(new OnItemClickListener() {
+
+		mList.setOnItemClickListener(new OnItemClickListener() {
 
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 				if (position == 1) {
 					// create a new group
-					startActivityForResult(new Intent(GroupsActivity.this, NewGroupActivity.class), 0);
+					MFGT.gotoCreateNewGroup(GroupsActivity.this);
+
 				} else if (position == 2) {
 					// join a public group
-					startActivityForResult(new Intent(GroupsActivity.this, PublicGroupsActivity.class), 0);
+					MFGT.gotoPublicGroup(GroupsActivity.this);
+
 				} else {
 					// enter group chat
 					Intent intent = new Intent(GroupsActivity.this, ChatActivity.class);
@@ -123,7 +143,7 @@ public class GroupsActivity extends BaseActivity {
 			}
 
 		});
-		groupListView.setOnTouchListener(new OnTouchListener() {
+		mList.setOnTouchListener(new OnTouchListener() {
 
 			@Override
 			public boolean onTouch(View v, MotionEvent event) {
@@ -135,7 +155,22 @@ public class GroupsActivity extends BaseActivity {
 				return false;
 			}
 		});
-		
+
+		// ATTENTION: This was auto-generated to implement the App Indexing API.
+		// See https://g.co/AppIndexing/AndroidStudio for more information.
+		client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
+	}
+
+	private void initView() {
+		//show group list
+		groupAdapter = new GroupAdapter(this, 1, grouplist);
+		mList.setAdapter(groupAdapter);
+
+		mSwipeLayout.setColorSchemeResources(R.color.holo_blue_bright, R.color.holo_green_light,
+				R.color.holo_orange_light, R.color.holo_red_light);
+		mImgBack.setVisibility(View.VISIBLE);
+		mTxtTitle.setVisibility(View.VISIBLE);
+		mTxtTitle.setText(getString(R.string.group_chat));
 	}
 
 	@Override
@@ -145,15 +180,15 @@ public class GroupsActivity extends BaseActivity {
 
 	@Override
 	public void onResume() {
-        refresh();
+		refresh();
 		super.onResume();
 	}
-	
-	private void refresh(){
-	    grouplist = EMClient.getInstance().groupManager().getAllGroups();
-        groupAdapter = new GroupAdapter(this, 1, grouplist);
-        groupListView.setAdapter(groupAdapter);
-        groupAdapter.notifyDataSetChanged();
+
+	private void refresh() {
+		grouplist = EMClient.getInstance().groupManager().getAllGroups();
+		groupAdapter = new GroupAdapter(this, 1, grouplist);
+		mList.setAdapter(groupAdapter);
+		groupAdapter.notifyDataSetChanged();
 	}
 
 	@Override
@@ -161,8 +196,8 @@ public class GroupsActivity extends BaseActivity {
 		super.onDestroy();
 		instance = null;
 	}
-
-	public void back(View view) {
-		finish();
+	@OnClick(R.id.img_back)
+	public void onClick(){
+		MFGT.finish(this);
 	}
 }
