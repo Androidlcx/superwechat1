@@ -144,7 +144,7 @@ public class LoginActivity extends BaseActivity {
         }
 
         progressShow = true;
-        ProgressDialog pd = new ProgressDialog(LoginActivity.this);
+        pd = new ProgressDialog(LoginActivity.this);
         pd.setCanceledOnTouchOutside(false);
         pd.setOnCancelListener(new OnCancelListener() {
 

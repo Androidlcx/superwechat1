@@ -23,7 +23,7 @@ import cn.ucai.superwechat.utils.MFGT;
  * Created by Administrator on 2016/11/4.
  */
 
-public class PeofileFragment extends Fragment {
+public class ProfileFragment extends Fragment {
     @Bind(R.id.iv_profile_avatar)
     ImageView mIvProfileAvatar;
     @Bind(R.id.tv_profile_nickname)

@@ -142,7 +142,16 @@ public class RegisterActivity extends BaseActivity {
             }
         });
     }
-//取消注册方法
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (pd != null){
+            pd.dismiss();
+        }
+    }
+
+    //取消注册方法
     private void unregisterAppServer() {
         NetDao.unregister(mContext, username, new OkHttpUtils.OnCompleteListener<Result>() {
             @Override

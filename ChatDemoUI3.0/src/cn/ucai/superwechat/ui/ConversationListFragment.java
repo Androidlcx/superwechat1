@@ -45,6 +45,7 @@ public class ConversationListFragment extends EaseConversationListFragment{
     @Override
     protected void setUpView() {
         super.setUpView();
+        hideTitleBar();//隐藏会话列表蓝色的标题
         // register context menu
         registerForContextMenu(conversationListView);
         conversationListView.setOnItemClickListener(new OnItemClickListener() {

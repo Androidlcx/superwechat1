@@ -180,12 +180,15 @@ public class UserProfileActivity extends BaseActivity implements OnClickListener
         NetDao.updateNick(this, user.getMUserName(), nickName, new OkHttpUtils.OnCompleteListener<String>() {
             @Override
             public void onSuccess(String s) {
-                if(s!=null){
+                if(s != null){
                     Result result = ResultUtils.getResultFromJson(s, User.class);
                     L.e(TAG,"result="+result);
                     if(result!=null && result.isRetMsg()){
                         User u = (User) result.getRetData();
+//                        SuperWeChatHelper.getInstance().saveAppContact(u);
+//                        EaseUserUtils.setCurentAppUserNick(mTvUserinfoNick);
                         updateLocatUser(u);
+
                     }else{
                         Toast.makeText(UserProfileActivity.this, getString(R.string.toast_updatenick_fail), Toast.LENGTH_SHORT)
                                 .show();
@@ -225,7 +228,7 @@ public class UserProfileActivity extends BaseActivity implements OnClickListener
             case REQUESTCODE_CUTTING:
                 if (data != null) {
                     updateAppUserAvatar(data);
-//                    setPicToView(data);
+                    setPicToView(data);
                 }
                 break;
             default:
